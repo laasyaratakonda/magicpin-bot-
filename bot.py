@@ -475,17 +475,28 @@ def _h_renewal_due(payload, merchant, category, customer, sal, identity, perf, p
 
 
 def _h_festival_upcoming(payload, merchant, category, customer, sal, identity, perf, peer, offers, signals):
-    days_until = payload.get("days_until", 999)
-    if days_until is None or days_until > 30:
-        return None  # too far out — restraint over spam
+    days_until = payload.get("days_until")
     festival = payload.get("festival", "the festival")
     top_offer = offers[0]["title"] if offers else None
-    offer_txt = f" Your {top_offer} could be the hook." if top_offer else ""
-    body = (
-        f"{sal}, {festival} is {days_until} days out.{offer_txt} "
-        f"Want a festival post drafted for your listing this week?"
-    )
-    return body, "open_ended", "External festival_upcoming inside the 30-day planning window"
+    if days_until is not None and days_until <= 30:
+        # Near-term: active planning ask, offer as the hook.
+        offer_txt = f" Your {top_offer} could be the hook." if top_offer else ""
+        body = (
+            f"{sal}, {festival} is {days_until} days out.{offer_txt} "
+            f"Want a festival post drafted for your listing this week?"
+        )
+        rationale = "External festival_upcoming inside the 30-day planning window — active ask"
+    else:
+        # Far out: still surface it (coverage matters), but low-key — a heads-up
+        # to plan ahead rather than a push to act immediately, so it doesn't read as spam.
+        days_txt = f"{days_until} days" if days_until is not None else "a while"
+        offer_txt = f" Your {top_offer} is already live, so there's no rush." if top_offer else ""
+        body = (
+            f"{sal}, just a heads-up: {festival} is {days_txt} away.{offer_txt} "
+            f"Nothing to do yet — I'll flag it again closer to the date."
+        )
+        rationale = "External festival_upcoming far out (>30d) — low-key heads-up instead of a hard ask, avoids spamming while still surfacing it"
+    return body, ("open_ended" if (days_until is not None and days_until <= 30) else "none"), rationale
 
 
 def _h_curious_ask_due(payload, merchant, category, customer, sal, identity, perf, peer, offers, signals):
