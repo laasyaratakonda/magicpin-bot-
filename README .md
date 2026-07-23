@@ -77,12 +77,3 @@ python3 local_harness.py
 ```
 
 Current local results: 29/30 triggers produce a grounded action (the 30th, a Diwali reminder 188 days out, is correctly withheld — that's restraint, not a bug), 0 over-320-char bodies, and all four scenario tests pass.
-
-## On the "95/100" target, honestly
-
-I can't guarantee a specific number, and you shouldn't take one from me or from any tool. Two real constraints:
-
-1. **The judge harness explicitly tests unseen scenarios**, not the 30 canonical pairs — new digest items, metric shifts, and customer contexts injected after submission. Everything above should generalize well because it's grounded in *reading the context object*, not in memorizing these 30 pairs, but I can't run the actual harness myself to confirm a score.
-2. **The final score comes from an LLM judge** scoring subjective qualities (tone, "engagement compulsion," category fit) — those have some inherent variance no amount of local testing eliminates.
-
-What I *can* tell you with confidence: the four specific weaknesses from your 55/100 report are now directly fixed and verified against the real dataset, and the message quality is materially more specific and grounded than the previous run's sample outputs.
